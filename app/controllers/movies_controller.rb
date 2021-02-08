@@ -8,23 +8,44 @@ class MoviesController < ApplicationController
 
   def index
    @all_ratings = Movie.rating
-#    @all_ratings.each do |rating_each|
-#      @ratings_to_show = params[:rating[rating_each]]
+    
+#    display_checks = []
+   @ratings_to_show = []
+    
+   if !params[:ratings].nil?
+     if !params[:ratings].keys.nil?
+       @ratings_to_show = params[:ratings].keys
+       @movies = Movie.with_ratings(@ratings_to_show)
+     end
+   else
+     @movies = Movie.all
+   end
+    
+   
+#      @all_ratings.each do |rating_each|
+#        display_checks.push((params[:ratings].keys).include?(rating_each))
+#      end  
+#    end
+    
+#    if !display_checks.empty?
+#      @ratings_to_show = display_checks
 #    end
    
-   if !params[:ratings].keys.nil? 
-      @ratings_to_show = params[:ratings].keys
+   
+#       params[:ratings]["G"] = 0
+#       params[:ratings].keys.include?
+#       @ratings_to_show = 
+#    end
+#       @movies = Movie.with_ratings(params[:ratings].keys)
 #    else
-#       @movies = Movie.all
-   end
+  
+  # end
     
 #    @all_ratings.each do |rating_filtered|
 #       if @ratings_to_show.include?(rating_filtered)
          
 #       end
 #    end
-     
-   @movies = Movie.with_ratings(params[:ratings].keys)
    
   end
 
