@@ -1,4 +1,5 @@
 class MoviesController < ApplicationController
+  helper_method :hilite
 
   def show
     id = params[:id] # retrieve movie ID from URI route
@@ -8,45 +9,53 @@ class MoviesController < ApplicationController
 
   def index
    @all_ratings = Movie.rating
-    
-#    display_checks = []
+
    @ratings_to_show = []
-    
-   if !params[:ratings].nil?
-     if !params[:ratings].keys.nil?
-       @ratings_to_show = params[:ratings].keys
-       @movies = Movie.with_ratings(@ratings_to_show)
-     end
+   @sort = params[:sort]
+   ratings = []
+   @ratings = params[:ratings]
+   
+   if @ratings.nil?
+     ratings = Movie.rating 
    else
-     @movies = Movie.all
+     ratings = @ratings.keys
+   end
+#    @ratings1 = []
+    
+#    if !params[:ratings].nil?
+#      if !params[:ratings].keys.nil?
+   @ratings_to_show = ratings
+#        @ratings1 = params[:ratings].keys
+   @movies = Movie.with_ratings(@ratings_to_show)
+#      end
+#    else
+# #      @ratings1 = Movie.rating
+#      @ratings_to_show = Movie.rating
+#      @movies = Movie.all
+#    end
+    
+   if !@sort.nil? 
+#       if @sort == "title"
+#         @hilite_title = "p-3 mb-2 bg-warning text-dark"
+#       elsif @sort == "release_date"
+#         @hilite_release_date = "p-3 mb-2 bg-warning text-dark"
+#       elsif @sort == "release_date"
+#       end
+      begin
+#         if !params[:ratings].nil?
+#           if !params[:ratings].keys.nil?
+        @movies = Movie.order("#{@sort} ASC").with_ratings(ratings)
+#           end
+#         end
+      rescue ActiveRecord::StatementInvalid
+        flash[:warning] = "Movies cannot be sorted by #{@sort}."
+        @movies = Movie.with_ratings(ratings)
+      end
+   else
+      @movies = Movie.with_ratings(ratings)
    end
     
-   
-#      @all_ratings.each do |rating_each|
-#        display_checks.push((params[:ratings].keys).include?(rating_each))
-#      end  
-#    end
-    
-#    if !display_checks.empty?
-#      @ratings_to_show = display_checks
-#    end
-   
-   
-#       params[:ratings]["G"] = 0
-#       params[:ratings].keys.include?
-#       @ratings_to_show = 
-#    end
-#       @movies = Movie.with_ratings(params[:ratings].keys)
-#    else
-  
-  # end
-    
-#    @all_ratings.each do |rating_filtered|
-#       if @ratings_to_show.include?(rating_filtered)
-         
-#       end
-#    end
-   
+      
   end
 
   def new
@@ -75,6 +84,21 @@ class MoviesController < ApplicationController
     @movie.destroy
     flash[:notice] = "Movie '#{@movie.title}' deleted."
     redirect_to movies_path
+  end
+  
+#   def hilite
+#     @sort = params[:sort]
+#     if !@sort.nil?
+      
+#     end
+#   end
+
+  def hilite(column)
+    if @sort == column
+      return "p-3 mb-2 bg-warning text-dark"
+    else
+      return nil
+    end
   end
   
   private
