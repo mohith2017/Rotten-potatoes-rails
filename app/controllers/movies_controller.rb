@@ -9,6 +9,11 @@ class MoviesController < ApplicationController
 
   def index
    @all_ratings = Movie.rating
+    
+   if params[:sort].nil? && params[:ratings].nil? &&
+        (!session[:sort].nil? || !session[:ratings].nil?)
+      redirect_to movies_path(:sort => session[:sort], :ratings => session[:ratings])
+   end
 
    @ratings_to_show = []
    @sort = params[:sort]
@@ -20,33 +25,21 @@ class MoviesController < ApplicationController
    else
      ratings = @ratings.keys
    end
-#    @ratings1 = []
     
-#    if !params[:ratings].nil?
-#      if !params[:ratings].keys.nil?
+#    if !session[:ratings].nil?
+#      ratings = session[:ratings].keys
+#    end
+
    @ratings_to_show = ratings
-#        @ratings1 = params[:ratings].keys
    @movies = Movie.with_ratings(@ratings_to_show)
-#      end
-#    else
-# #      @ratings1 = Movie.rating
-#      @ratings_to_show = Movie.rating
-#      @movies = Movie.all
+     
+#    if !session[:ratings].nil?
+#      ratings = session[:ratings].keys
 #    end
     
    if !@sort.nil? 
-#       if @sort == "title"
-#         @hilite_title = "p-3 mb-2 bg-warning text-dark"
-#       elsif @sort == "release_date"
-#         @hilite_release_date = "p-3 mb-2 bg-warning text-dark"
-#       elsif @sort == "release_date"
-#       end
       begin
-#         if !params[:ratings].nil?
-#           if !params[:ratings].keys.nil?
         @movies = Movie.order("#{@sort} ASC").with_ratings(ratings)
-#           end
-#         end
       rescue ActiveRecord::StatementInvalid
         flash[:warning] = "Movies cannot be sorted by #{@sort}."
         @movies = Movie.with_ratings(ratings)
@@ -55,7 +48,8 @@ class MoviesController < ApplicationController
       @movies = Movie.with_ratings(ratings)
    end
     
-      
+   session[:sort] = @sort
+   session[:ratings] = @ratings
   end
 
   def new
@@ -94,7 +88,7 @@ class MoviesController < ApplicationController
 #   end
 
   def hilite(column)
-    if @sort == column
+    if session[:sort] == column
       return "p-3 mb-2 bg-warning text-dark"
     else
       return nil
